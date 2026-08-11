@@ -42,7 +42,8 @@ class DashboardController extends Controller
         }
 
         // 3. Top 5 Best-Selling Products (by quantity)
-        $topSelling = SaleItem::select('product_id', DB::raw('SUM(quantity) as total_qty'))
+        $topSelling = SaleItem::whereHas('sale')
+            ->select('product_id', DB::raw('SUM(quantity) as total_qty'))
             ->groupBy('product_id')
             ->orderByDesc('total_qty')
             ->take(5)
@@ -52,6 +53,7 @@ class DashboardController extends Controller
         // 4. Top 5 Most Profitable Products (by margin)
         $topProfitable = SaleItem::select('sale_items.product_id', DB::raw('SUM((sale_items.price - products.cost_price) * sale_items.quantity) as total_profit'))
             ->join('products', 'sale_items.product_id', '=', 'products.id')
+            ->where('products.tenant_id', auth()->user()->tenant_id ?? 1)
             ->groupBy('sale_items.product_id')
             ->orderByDesc('total_profit')
             ->take(5)
@@ -65,6 +67,7 @@ class DashboardController extends Controller
         $categorySales = SaleItem::select('categories.name', DB::raw('SUM(sale_items.price * sale_items.quantity) as category_total'))
             ->join('products', 'sale_items.product_id', '=', 'products.id')
             ->join('categories', 'products.category_id', '=', 'categories.id')
+            ->where('products.tenant_id', auth()->user()->tenant_id ?? 1)
             ->groupBy('categories.name')
             ->orderByDesc('category_total')
             ->get();

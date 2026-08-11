@@ -129,7 +129,7 @@
         
         {{-- Header --}}
         <div class="header text-center">
-            <h1>{{ config('app.name', 'POS System') }}</h1>
+            <h1>{{ auth()->user()->tenant->name ?? config('app.name', 'POS System') }}</h1>
             <p>{{ $sale->branch->name ?? 'Main Store' }}</p>
             <p>{{ $sale->branch->address ?? '123 Main Street' }}</p>
             <p>Tel: {{ $sale->branch->phone ?? '555-0199' }}</p>
@@ -142,9 +142,15 @@
             <span>Date:</span>
             <span>{{ $sale->created_at->format('Y-m-d H:i') }}</span>
         </div>
+        @php
+            $dailyReceiptNumber = \App\Models\Sale::whereDate('created_at', $sale->created_at->toDateString())
+                ->where('id', '<=', $sale->id)
+                ->where('tenant_id', $sale->tenant_id ?? (auth()->user()->tenant_id ?? 1))
+                ->count();
+        @endphp
         <div class="info-row">
             <span>Receipt:</span>
-            <span>#{{ str_pad($sale->id, 8, '0', STR_PAD_LEFT) }}</span>
+            <span>#{{ str_pad($dailyReceiptNumber, 4, '0', STR_PAD_LEFT) }}</span>
         </div>
         <div class="info-row">
             <span>Cashier:</span>

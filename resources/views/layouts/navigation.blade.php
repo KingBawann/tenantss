@@ -1,14 +1,16 @@
 <aside 
-    class="border-r border-slate-800 text-white w-64 flex-shrink-0 fixed inset-y-0 left-0 z-50 transition-all duration-300 md:relative md:translate-x-0 bg-slate-900"
+    class="border-r border-white/5 text-white w-64 flex-shrink-0 fixed inset-y-0 left-0 z-50 transition-all duration-300 md:relative md:translate-x-0 bg-slate-950"
     :class="{'translate-x-0': sidebarOpen, '-translate-x-full md:-ml-64': !sidebarOpen}"
     @click.away="if(window.innerWidth < 768) sidebarOpen = false"
 >
     <div class="h-full flex flex-col">
         <!-- Sidebar Header (Logo) -->
-        <div class="h-16 flex items-center px-6 border-b border-slate-800">
+        <div class="h-16 flex items-center px-6 border-b border-white/5">
             <a href="{{ Auth::user() && Auth::user()->hasAdminAccess() ? route('dashboard') : route('sales.create') }}" class="flex items-center gap-2">
-                <x-application-logo class="block h-8 w-auto fill-current text-white" />
-                <span class="font-bold text-xl tracking-tight">{{ config('app.name', 'Laravel') }}</span>
+                <div class="w-7 h-7 rounded bg-blue-600 flex items-center justify-center">
+                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                </div>
+                <span class="font-bold text-xl tracking-tight">POS</span>
             </a>
             <!-- Close button (Visible on both mobile & desktop) -->
             <button @click="sidebarOpen = false" class="ml-auto text-slate-400 hover:text-white transition-colors">
@@ -17,7 +19,7 @@
         </div>
 
         <!-- Sidebar User Profile (Moved to Top) -->
-        <div class="p-4 border-b border-slate-800 bg-slate-800/50">
+        <div class="p-4 border-b border-white/5 bg-slate-900/50">
             <x-dropdown align="left" width="48">
                 <x-slot name="trigger">
                     <button class="w-full flex items-center justify-between px-2 py-1 border border-transparent text-sm leading-4 font-semibold rounded-md text-slate-300 hover:text-white focus:outline-none transition ease-in-out duration-150">

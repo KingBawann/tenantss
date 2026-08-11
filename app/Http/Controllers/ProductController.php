@@ -23,7 +23,8 @@ class ProductController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'category_id' => 'required|integer',
+            'category_id' => 'nullable|integer',
+            'new_category_name' => 'nullable|string|max:255',
             'barcode' => 'nullable|string',
             'price' => 'required|numeric',
             'cost_price' => 'required|numeric',
@@ -31,6 +32,17 @@ class ProductController extends Controller
         ]);
 
         try {
+            // Handle inline category creation
+            if (!empty($validated['new_category_name'])) {
+                // Ensure tenant_id is used for multi-tenancy if applicable, or rely on model boot.
+                // Assuming Category belongs to a tenant like Product.
+                $category = \App\Models\Category::firstOrCreate(
+                    ['name' => $validated['new_category_name'], 'tenant_id' => auth()->user()->tenant_id ?? 1]
+                );
+                $validated['category_id'] = $category->id;
+            }
+            unset($validated['new_category_name']);
+
             Product::create($validated);
             session()->flash('success', 'Product created successfully!');
         } catch (\Exception $e) {
@@ -72,7 +84,8 @@ class ProductController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'category_id' => 'required|integer',
+            'category_id' => 'nullable|integer',
+            'new_category_name' => 'nullable|string|max:255',
             'barcode' => 'nullable|string',
             'price' => 'required|numeric',
             'cost_price' => 'required|numeric',
@@ -80,6 +93,15 @@ class ProductController extends Controller
         ]);
 
         try {
+            // Handle inline category creation
+            if (!empty($validated['new_category_name'])) {
+                $category = \App\Models\Category::firstOrCreate(
+                    ['name' => $validated['new_category_name'], 'tenant_id' => auth()->user()->tenant_id ?? 1]
+                );
+                $validated['category_id'] = $category->id;
+            }
+            unset($validated['new_category_name']);
+
             $product->update($validated);
             session()->flash('success', 'Product updated successfully!');
         } catch (\Exception $e) {

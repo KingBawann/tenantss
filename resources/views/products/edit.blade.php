@@ -29,17 +29,28 @@
                             </div>
 
                             {{-- Category --}}
-                            <div class="col-span-1 md:col-span-2">
-                                <x-input-label for="category_id" value="Category *" />
-                                <select id="category_id" name="category_id" required class="block mt-1 w-full border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg shadow-sm transition-all duration-200 ease-in-out text-sm">
-                                    <option value="" disabled>-- Select Category --</option>
-                                    @isset($categories)
-                                        @foreach($categories as $category)
-                                            <option value="{{ $category->id }}" {{ old('category_id', $product->category_id) == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
-                                        @endforeach
-                                    @endisset
-                                </select>
-                                <x-input-error :messages="$errors->get('category_id')" class="mt-2" />
+                            <div class="col-span-1 md:col-span-2" x-data="{ addingNew: {{ old('new_category_name') ? 'true' : 'false' }} }">
+                                <div class="flex items-center justify-between mb-1">
+                                    <x-input-label for="category_id" value="Category" />
+                                    <button type="button" @click="addingNew = !addingNew; if(addingNew) { $nextTick(() => $refs.newCat.focus()); document.getElementById('category_id').value=''; } else { document.getElementById('new_category_name').value=''; }" class="text-xs text-blue-600 hover:text-blue-800 font-semibold" x-text="addingNew ? 'Cancel' : '+ Add New Category'"></button>
+                                </div>
+                                
+                                <div x-show="!addingNew">
+                                    <select id="category_id" name="category_id" class="block w-full border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg shadow-sm transition-all duration-200 ease-in-out text-sm">
+                                        <option value="">-- No Category --</option>
+                                        @isset($categories)
+                                            @foreach($categories as $category)
+                                                <option value="{{ $category->id }}" {{ old('category_id', $product->category_id) == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
+                                            @endforeach
+                                        @endisset
+                                    </select>
+                                    <x-input-error :messages="$errors->get('category_id')" class="mt-2" />
+                                </div>
+
+                                <div x-show="addingNew" style="display: none;">
+                                    <x-text-input x-ref="newCat" id="new_category_name" class="block w-full" type="text" name="new_category_name" :value="old('new_category_name')" placeholder="Enter new category name..." />
+                                    <x-input-error :messages="$errors->get('new_category_name')" class="mt-2" />
+                                </div>
                             </div>
 
                             {{-- Price --}}

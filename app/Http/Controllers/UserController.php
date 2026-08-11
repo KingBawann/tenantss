@@ -21,7 +21,7 @@ class UserController extends Controller
     {
         $this->authorize('viewAny', User::class);
 
-        $query = User::query();
+        $query = User::where('tenant_id', auth()->user()->tenant_id);
 
         if ($request->filled('role')) {
             $query->where('role', $request->role);
