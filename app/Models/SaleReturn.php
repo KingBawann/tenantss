@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Traits\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
 
 class SaleReturn extends Model
 {
+    use BelongsToTenant;
+
     protected $fillable = ['tenant_id', 'sale_id', 'user_id', 'reason', 'total'];
 
     public function sale()
