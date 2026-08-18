@@ -34,15 +34,22 @@ class RegisteredUserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'business_name' => ['required', 'string', 'max:255'],
+            'business_type' => ['required', 'string', 'in:retail,hospitality,service,other'],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'subscription_plan' => ['required', 'string', 'in:free,pro,enterprise'],
         ]);
 
         $tenant = \App\Models\Tenant::create([
-            'name' => $request->name . "'s Business",
-            'business_type' => 'retail',
+            'name' => $request->business_name,
+            'business_type' => $request->business_type,
             'email' => $request->email,
+            'phone' => $request->phone,
+            'subscription_plan' => $request->subscription_plan,
         ]);
 
         $user = User::create([
+            'tenant_id' => $tenant->id,
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),

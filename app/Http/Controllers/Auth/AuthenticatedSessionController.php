@@ -26,9 +26,20 @@ class AuthenticatedSessionController extends Controller
     {
         $request->authenticate();
 
+        $user = $request->user();
+        if ($user->tenant && ($user->tenant->status !== 'active' || !$user->tenant->is_active)) {
+            Auth::guard('web')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'email' => 'Your store account is currently ' . ($user->tenant->status ?? 'inactive') . '. Please contact support.',
+            ]);
+        }
+
         $request->session()->regenerate();
 
-        if ($request->user() && $request->user()->hasAdminAccess()) {
+        if ($user && $user->hasAdminAccess()) {
             return redirect()->intended(route('dashboard', absolute: false));
         }
 

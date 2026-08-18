@@ -30,6 +30,7 @@ Route::middleware(['auth', 'verified', 'active'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // Sales — cashiers can view and create; admin can do full CRUD (policy-controlled)
+    Route::get('/sales/latest/receipt', [\App\Http\Controllers\SaleController::class, 'latestReceipt'])->name('sales.latest.receipt');
     Route::get('sales/{sale}/receipt', [\App\Http\Controllers\SaleController::class, 'receipt'])->name('sales.receipt');
     Route::resource('sales', \App\Http\Controllers\SaleController::class);
     
@@ -38,6 +39,15 @@ Route::middleware(['auth', 'verified', 'active'])->group(function () {
 
     // Z-Report (Shift Summary)
     Route::get('/reports/z-report', [\App\Http\Controllers\ReportController::class, 'zReport'])->name('reports.z-report');
+
+    // Shift Management
+    Route::get('/shift/open', function() { return view('shifts.open'); })->name('shift.open');
+    Route::get('/shift/close', function() { return view('shifts.close'); })->name('shift.close');
+    Route::get('/shift/status', [\App\Http\Controllers\ShiftController::class, 'status'])->name('shift.status');
+    Route::post('/shift/open', [\App\Http\Controllers\ShiftController::class, 'open'])->name('shift.open.store');
+    Route::post('/shift/close', [\App\Http\Controllers\ShiftController::class, 'close'])->name('shift.close.store');
+    // Manager PIN Verification
+    Route::post('/api/pin/verify', [\App\Http\Controllers\Api\PinController::class, 'verify'])->name('api.pin.verify');
 });
 
 /*
@@ -56,9 +66,14 @@ Route::middleware(['auth', 'verified', 'active', 'admin'])->group(function () {
     Route::get('/reports/profit-loss', [\App\Http\Controllers\ReportController::class, 'profitAndLoss'])->name('reports.profit-loss');
     Route::get('/reports/inventory', [\App\Http\Controllers\ReportController::class, 'inventory'])->name('reports.inventory');
 
+    // Settings
+    Route::get('/settings', [\App\Http\Controllers\SettingController::class, 'index'])->name('settings.index');
+    Route::post('/settings', [\App\Http\Controllers\SettingController::class, 'update'])->name('settings.update');
+
     // Inventory & catalog management
     Route::resource('categories', \App\Http\Controllers\CategoryController::class);
     Route::resource('products', \App\Http\Controllers\ProductController::class);
+    Route::post('stock-adjustments', [\App\Http\Controllers\StockAdjustmentController::class, 'store'])->name('stock-adjustments.store');
 
     // Customers & suppliers
     Route::resource('customers', \App\Http\Controllers\CustomerController::class);
@@ -71,6 +86,13 @@ Route::middleware(['auth', 'verified', 'active', 'admin'])->group(function () {
     Route::resource('users', UserController::class);
     Route::post('users/{user}/reset-password', [UserController::class, 'resetPassword'])->name('users.reset-password');
     Route::patch('users/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggle-status');
+
+    // Shift History (admin can view all shifts)
+    Route::resource('shifts', \App\Http\Controllers\ShiftController::class)->only(['index', 'show']);
+
+    // CSV Import
+    Route::get('products/import', [\App\Http\Controllers\ProductController::class, 'showImport'])->name('products.import');
+    Route::post('products/import', [\App\Http\Controllers\ProductController::class, 'import'])->name('products.import.store');
 });
 
 require __DIR__.'/auth.php';

@@ -45,6 +45,10 @@ class SaleController extends Controller
 
     public function create()
     {
+        if (auth()->user()->tenant->is_master ?? false) {
+            return redirect()->route('dashboard')->with('error', 'Master tenants cannot access the POS system.');
+        }
+
         $products = Product::with('category')->get()->append('expiry_status');
         $categories = \App\Models\Category::all();
         $customers = Customer::all();
@@ -55,11 +59,13 @@ class SaleController extends Controller
     {
         $validated = $request->validate([
             'payment_status'       => 'required|string|in:paid,partial,pending',
-            'payment_method'       => 'required|string|in:cash,card',
+            'payment_method'       => 'required|string|in:cash,card,split',
             'customer_id'          => 'nullable|integer|exists:customers,id',
             'discount_type'        => 'required|string|in:none,percentage,fixed',
             'discount_value'       => 'nullable|numeric|min:0',
             'amount_tendered'      => 'nullable|numeric|min:0',
+            'cash_amount'          => 'nullable|numeric|min:0',
+            'card_amount'          => 'nullable|numeric|min:0',
             'items'                => 'required|array|min:1',
             'items.*.product_id'   => 'required|integer|exists:products,id',
             'items.*.quantity'     => 'required|integer|min:1',
@@ -101,6 +107,8 @@ class SaleController extends Controller
                 'payment_status' => $validated['payment_status'],
                 'payment_method' => $validated['payment_method'],
                 'amount_tendered'=> $validated['amount_tendered'] ?? null,
+                'cash_amount'    => $validated['cash_amount'] ?? null,
+                'card_amount'    => $validated['card_amount'] ?? null,
             ]);
 
             // Create line items, deduct stock, log inventory actions
@@ -127,6 +135,24 @@ class SaleController extends Controller
                     'date'       => now()->toDateString(),
                 ]);
             }
+            // Update loyalty points if customer exists
+            if ($sale->customer_id) {
+                $customer = \App\Models\Customer::find($sale->customer_id);
+                if ($customer) {
+                    $pointsEarned = floor($sale->total);
+                    $newPoints = $customer->loyalty_points + $pointsEarned;
+                    $tier = 'bronze';
+                    if ($newPoints >= 2000) {
+                        $tier = 'gold';
+                    } elseif ($newPoints >= 500) {
+                        $tier = 'silver';
+                    }
+                    $customer->update([
+                        'loyalty_points' => $newPoints,
+                        'loyalty_tier'   => $tier,
+                    ]);
+                }
+            }
 
             DB::commit();
             session()->flash('success', "Sale #{$sale->id} created! Total: \${$total}. Stock deducted for " . count($validated['items']) . " product(s).");
@@ -136,6 +162,10 @@ class SaleController extends Controller
             return back()->withInput();
         }
 
+        if ($request->has('no_print') && $request->no_print) {
+            return redirect()->route('sales.create');
+        }
+
         return redirect()->route('sales.receipt', ['sale' => $sale->id, 'print' => 1]);
     }
 
@@ -143,6 +173,12 @@ class SaleController extends Controller
     {
         $sale->load('items.product', 'customer', 'user', 'branch');
         return view('sales.show', compact('sale'));
+    }
+
+    public function latestReceipt()
+    {
+        $sale = Sale::latest()->firstOrFail();
+        return redirect()->route('sales.receipt', ['sale' => $sale->id, 'print' => 1]);
     }
 
     public function receipt(Sale $sale)

@@ -9,6 +9,10 @@ class Tenant extends Model
 {
     use HasFactory;
 
+    protected $casts = [
+        'settings' => 'array',
+    ];
+
     protected $fillable = [
         'name',
         'email',

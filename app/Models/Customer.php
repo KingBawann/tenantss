@@ -13,7 +13,7 @@ class Customer extends Model
 
     use SoftDeletes;
 
-    protected $fillable = ['tenant_id', 'name', 'phone', 'balance'];
+    protected $fillable = ['tenant_id', 'name', 'phone', 'balance', 'loyalty_points', 'loyalty_tier'];
 
     
     public function sales() { return $this->hasMany(Sale::class); }

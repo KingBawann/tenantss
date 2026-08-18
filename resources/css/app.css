@@ -2,8 +2,99 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  body {
-    @apply bg-slate-900 text-slate-100 antialiased selection:bg-blue-500/30 selection:text-blue-200;
+/*
+ * Theme system: CSS custom properties switch
+ * based on .dark class on <html>.
+ */
+:root {
+  --c-surface:      #f8fafc;
+  --c-surface-alt:  #ffffff;
+  --c-surface-muted:#f1f5f9;
+  --c-border:       #e2e8f0;
+  --c-border-muted: #f1f5f9;
+  --c-text:         #0f172a;
+  --c-text-sec:     #475569;
+  --c-text-muted:   #64748b;
+  --c-input-bg:     #f8fafc;
+  --c-hover:        #f1f5f9;
+  --c-row-hover:    #f8fafc;
+}
+
+html.dark {
+  --c-surface:      #121212;
+  --c-surface-alt:  #1e1e1e;
+  --c-surface-muted:#181818;
+  --c-border:       #2d2d2d;
+  --c-border-muted: #262626;
+  --c-text:         #f8fafc;
+  --c-text-sec:     #cbd5e1;
+  --c-text-muted:   #94a3b8;
+  --c-input-bg:     #121212;
+  --c-hover:        #2d2d2d;
+  --c-row-hover:    #1e1e1e;
+}
+
+/* ── Background overrides ── */
+.bg-slate-50, .bg-gray-50             { background-color: var(--c-surface) !important; }
+.bg-white                             { background-color: var(--c-surface-alt) !important; }
+.bg-slate-100, .bg-gray-100           { background-color: var(--c-surface-muted) !important; }
+
+/* ── Border overrides ── */
+.border-slate-200, .border-gray-200,
+.border-slate-300                     { border-color: var(--c-border) !important; }
+.border-slate-100                     { border-color: var(--c-border-muted) !important; }
+.divide-slate-200 > :not([hidden]) ~ :not([hidden]),
+.divide-slate-100 > :not([hidden]) ~ :not([hidden]) { border-color: var(--c-border-muted) !important; }
+
+/* ── Text overrides ── */
+.text-slate-900, .text-gray-900,
+.text-slate-800                       { color: var(--c-text) !important; }
+.text-slate-700, .text-gray-700,
+.text-slate-600, .text-gray-600       { color: var(--c-text-sec) !important; }
+.text-slate-500, .text-gray-500       { color: var(--c-text-muted) !important; }
+
+/* ── Form inputs ── */
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not(.no-theme),
+select:not(.no-theme),
+textarea:not(.no-theme) {
+  background-color: var(--c-input-bg) !important;
+  color: var(--c-text) !important;
+  border-color: var(--c-border) !important;
+}
+
+/* ── Table header ── */
+th { color: var(--c-text-sec) !important; }
+
+/* ── Hover overrides ── */
+.hover\:bg-slate-50:hover,
+.hover\:bg-slate-100:hover,
+.hover\:bg-gray-50:hover,
+.hover\:bg-white:hover                { background-color: var(--c-hover) !important; }
+tr:hover td                           { background-color: var(--c-row-hover) !important; }
+.hover\:text-slate-900:hover,
+.hover\:text-gray-900:hover           { color: var(--c-text) !important; }
+
+/* ── Scrollbar ── */
+.custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; opacity: 0.3; }
+html.dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; }
+
+/* ── Selection ── */
+::selection { background-color: #3b82f6; color: white; }
+
+/* ── Sidebar: always dark, never themed ── */
+aside, aside * {
+  --c-surface: #020617 !important;
+  --c-surface-alt: #0f172a !important;
+  --c-border: rgba(255,255,255,0.05) !important;
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

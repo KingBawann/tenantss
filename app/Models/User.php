@@ -13,8 +13,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Laravel\Sanctum\HasApiTokens;
 use App\Models\LoginLog;
 
-#[Fillable(['tenant_id', 'name', 'email', 'password', 'branch_id', 'role', 'is_active'])]
-#[Hidden(['password', 'remember_token'])]
+#[Fillable(['tenant_id', 'name', 'email', 'password', 'manager_pin', 'branch_id', 'role', 'is_active'])]
+#[Hidden(['password', 'manager_pin', 'remember_token'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */

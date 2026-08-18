@@ -1,5 +1,5 @@
 <aside 
-    class="border-r border-white/5 text-white w-64 flex-shrink-0 fixed inset-y-0 left-0 z-50 transition-all duration-300 md:relative md:translate-x-0 bg-slate-950"
+    class="border-r border-white/5 text-white w-64 flex-shrink-0 fixed inset-y-0 left-0 z-50 transition-all duration-300 md:relative md:translate-x-0 bg-slate-900"
     :class="{'translate-x-0': sidebarOpen, '-translate-x-full md:-ml-64': !sidebarOpen}"
     @click.away="if(window.innerWidth < 768) sidebarOpen = false"
 >
@@ -19,7 +19,7 @@
         </div>
 
         <!-- Sidebar User Profile (Moved to Top) -->
-        <div class="p-4 border-b border-white/5 bg-slate-900/50">
+        <div class="p-4 border-b border-white/5 bg-slate-800/50">
             <x-dropdown align="left" width="48">
                 <x-slot name="trigger">
                     <button class="w-full flex items-center justify-between px-2 py-1 border border-transparent text-sm leading-4 font-semibold rounded-md text-slate-300 hover:text-white focus:outline-none transition ease-in-out duration-150">
@@ -59,10 +59,12 @@
         <!-- Sidebar Links -->
         <div class="flex-1 overflow-y-auto py-4 px-3 space-y-1" id="sidebar-scroll" @scroll.debounce.100ms="localStorage.setItem('sidebarScroll', $event.target.scrollTop)">
             
-            <a href="{{ route('sales.create') }}" class="flex items-center px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold rounded-lg shadow-sm transition-all duration-150 mb-4">
+            @if(!(Auth::user()->tenant->is_master ?? false))
+            <a href="{{ route('sales.create') }}" class="active-scale flex items-center px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold rounded-lg shadow-sm transition-all duration-150 mb-4">
                 <svg class="w-5 h-5 mr-3 opacity-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
                 {{ __('Point of Sale') }}
             </a>
+            @endif
 
             @if(Auth::user() && Auth::user()->hasAdminAccess())
                 <p class="px-3 text-xs font-bold text-slate-500 uppercase tracking-wider mt-6 mb-2">Overview</p>
@@ -83,6 +85,21 @@
                 <svg class="w-5 h-5 mr-3 {{ request()->routeIs('sale-returns.*') ? 'text-amber-400' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14V5a2 2 0 00-2-2H6a2 2 0 00-2 2v16l4-2 4 2 4-2 4 2z"></path></svg>
                 {{ __('Returns') }}
             </x-nav-link>
+
+            {{-- Shift Management (all roles) --}}
+            @php $hasOpenShift = \App\Models\Shift::where('user_id', Auth::id())->where('status', 'open')->exists(); @endphp
+            @if($hasOpenShift)
+                <a href="{{ route('shift.close') }}" class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md text-amber-300 hover:bg-amber-900/20 hover:text-amber-200 transition-colors border border-amber-800/30 mt-2">
+                    <svg class="w-5 h-5 mr-3 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Close Shift
+                    <span class="ml-auto text-[9px] font-black uppercase tracking-wider bg-amber-600 text-white px-1.5 py-0.5 rounded">OPEN</span>
+                </a>
+            @else
+                <a href="{{ route('shift.open') }}" class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md text-slate-300 hover:bg-slate-800 hover:text-white transition-colors mt-2">
+                    <svg class="w-5 h-5 mr-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Open Shift
+                </a>
+            @endif
 
             <p class="px-3 text-xs font-bold text-slate-500 uppercase tracking-wider mt-6 mb-2">Reports</p>
             
@@ -111,6 +128,10 @@
                     <svg class="w-5 h-5 mr-3 {{ request()->routeIs('products.*') ? 'text-blue-400' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
                     {{ __('Products') }}
                 </x-nav-link>
+                <a href="{{ route('products.import') }}" class="w-full flex items-center pl-11 pr-3 py-1.5 text-xs font-medium rounded-md text-slate-500 hover:text-slate-300 hover:bg-slate-800 transition-colors">
+                    <svg class="w-3.5 h-3.5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                    CSV Import
+                </a>
                 <x-nav-link :href="route('customers.index')" :active="request()->routeIs('customers.*')" class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md {{ request()->routeIs('customers.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }} transition-colors">
                     <svg class="w-5 h-5 mr-3 {{ request()->routeIs('customers.*') ? 'text-blue-400' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                     {{ __('Customers') }}
@@ -128,6 +149,23 @@
                     {{ __('Staff') }}
                 </x-nav-link>
             @endif
+        </div>
+
+        <!-- Sidebar Footer (Theme Toggle) -->
+        <div class="p-4 border-t border-white/5 bg-slate-800/50 mt-auto">
+            <button
+                x-data="{ dark: document.documentElement.classList.contains('dark') }"
+                @click="dark = !dark; document.documentElement.classList.toggle('dark', dark); localStorage.setItem('contentTheme', dark ? 'dark' : 'light')"
+                class="w-full flex items-center justify-center px-4 py-2 border border-slate-700 rounded-md shadow-sm text-sm font-medium text-slate-300 bg-slate-800 hover:bg-slate-700 hover:text-white focus:outline-none transition-colors"
+            >
+                <template x-if="!dark">
+                    <svg class="w-5 h-5 mr-2 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                </template>
+                <template x-if="dark">
+                    <svg class="w-5 h-5 mr-2 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                </template>
+                <span x-text="dark ? 'Light Mode' : 'Dark Mode'"></span>
+            </button>
         </div>
         
         <script>

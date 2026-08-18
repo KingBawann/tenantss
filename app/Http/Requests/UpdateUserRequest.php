@@ -28,7 +28,15 @@ class UpdateUserRequest extends FormRequest
 
         return [
             'name'      => ['sometimes', 'required', 'string', 'max:255'],
-            'email'     => ['sometimes', 'required', 'email', 'max:255', 'unique:users,email,' . $userId],
+            'email'     => [
+                'sometimes', 
+                'required', 
+                'email', 
+                'max:255', 
+                \Illuminate\Validation\Rule::unique('users')->where(function ($query) {
+                    return $query->where('tenant_id', auth()->user()->tenant_id);
+                })->ignore($userId)
+            ],
             'password'  => ['nullable', 'string', 'min:8', 'confirmed'],
             'role'      => ['sometimes', 'required', 'in:cashier,manager,admin'],
             'branch_id' => ['nullable', 'integer', 'exists:branches,id'],

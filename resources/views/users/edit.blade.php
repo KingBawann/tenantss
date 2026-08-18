@@ -12,7 +12,7 @@
         </div>
     </x-slot>
 
-    <div class="py-12 min-h-screen">
+    <div class="py-12 min-h-screen bg-slate-50">
         <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-xl border border-slate-200">
                 <form action="{{ route('users.update', $user) }}" method="POST" class="p-8">

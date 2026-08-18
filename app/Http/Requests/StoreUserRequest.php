@@ -23,7 +23,14 @@ class StoreUserRequest extends FormRequest
     {
         return [
             'name'      => ['required', 'string', 'max:255'],
-            'email'     => ['required', 'email', 'max:255', 'unique:users,email'],
+            'email'     => [
+                'required', 
+                'email', 
+                'max:255', 
+                \Illuminate\Validation\Rule::unique('users')->where(function ($query) {
+                    return $query->where('tenant_id', auth()->user()->tenant_id);
+                })
+            ],
             'password'  => ['required', 'string', 'min:8', 'confirmed'],
             'role'      => ['required', 'in:cashier,manager,admin'],
             'branch_id' => ['nullable', 'integer', 'exists:branches,id'],

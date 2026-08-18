@@ -11,7 +11,7 @@
         </div>
     </x-slot>
 
-    <div class="py-12 min-h-screen" x-data="{ resetModalOpen: false, selectedUser: null, selectedUserName: '' }">
+    <div class="py-12 min-h-screen bg-slate-50" x-data="{ resetModalOpen: false, selectedUser: null, selectedUserName: '' }">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             
             {{-- Alerts --}}
